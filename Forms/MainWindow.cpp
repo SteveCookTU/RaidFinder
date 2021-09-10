@@ -25,11 +25,11 @@
 #include <Core/Loader/ProfileLoader.hpp>
 #include <Core/Util/Translator.hpp>
 #include <Forms/Profile/ProfileManager.hpp>
+#include <Forms/Tools/Bots.hpp>
 #include <Forms/Tools/DenMap.hpp>
 #include <Forms/Tools/EncounterLookup.hpp>
 #include <Forms/Tools/IVCalculator.hpp>
 #include <Forms/Tools/Settings.hpp>
-#include <Forms/Tools/Bots.hpp>
 #include <Models/StateModel.hpp>
 #include <QApplication>
 #include <QDesktopServices>
@@ -274,7 +274,8 @@ void MainWindow::downloadEventData()
     }
 
     bool flag;
-    QString item = QInputDialog::getItem(this, tr("Download Event Data"), tr("Event"), entries, 0, false, &flag, Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+    QString item = QInputDialog::getItem(this, tr("Download Event Data"), tr("Event"), entries, 0, false, &flag,
+                                         Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
     if (!flag)
     {
         return;
@@ -390,8 +391,11 @@ void MainWindow::denIndexChanged(int index)
         auto raids = den.getRaids(currentProfile.getVersion());
         for (const auto &raid : raids)
         {
-            ui->comboBoxSpecies->addItem(QString("%1: %2").arg(QString::fromStdString(Translator::getSpecie(raid.getSpecies())),
-                                                               QString::fromStdString(raid.getStarDisplay())), QString::number(raid.getSpecies()) + "," + QString::number(raid.getMinStars()) + "," + QString::number(raid.getMaxStars()));
+            ui->comboBoxSpecies->addItem(QString("%1 (%2): %3")
+                                             .arg(QString::fromStdString(Translator::getSpecie(raid.getSpecies())),
+                                                  QString::number(raid.getAltForm()), QString::fromStdString(raid.getStarDisplay())),
+                                         QString::number(raid.getSpecies()) + "," + QString::number(raid.getMinStars()) + ","
+                                             + QString::number(raid.getMaxStars()));
         }
     }
 }
@@ -459,21 +463,26 @@ void MainWindow::tableViewContextMenu(QPoint pos)
     }
 }
 
-void MainWindow::sendDenInfo(){
-    emit denInfo(ui->comboBoxDen->currentData().toInt(), ui->comboBoxRarity->currentIndex(), ui->comboBoxSpecies->currentData().toString().split(",").at(0).toInt(), ui->comboBoxSpecies->currentData().toString().split(",").at(1).toInt(), ui->comboBoxSpecies->currentData().toString().split(",").at(2).toInt(), ui->labelGigantamaxValue->text() == "Yes" ? true : false, ui->comboBoxShinyType->currentData().toInt());
+void MainWindow::sendDenInfo()
+{
+    emit denInfo(ui->comboBoxDen->currentData().toInt(), ui->comboBoxRarity->currentIndex(),
+                 ui->comboBoxSpecies->currentData().toString().split(",").at(0).toInt(),
+                 ui->comboBoxSpecies->currentData().toString().split(",").at(1).toInt(),
+                 ui->comboBoxSpecies->currentData().toString().split(",").at(2).toInt(),
+                 ui->labelGigantamaxValue->text() == "Yes" ? true : false, ui->comboBoxShinyType->currentData().toInt());
 }
 
 void MainWindow::lockBoxes(bool location, bool den, bool rarity, bool species, bool seed)
 {
-    if(location)
+    if (location)
         ui->comboBoxLocation->setEnabled(false);
-    if(den)
+    if (den)
         ui->comboBoxDen->setEnabled(false);
-    if(rarity)
+    if (rarity)
         ui->comboBoxRarity->setEnabled(false);
-    if(species)
+    if (species)
         ui->comboBoxSpecies->setEnabled(false);
-    if(seed)
+    if (seed)
         ui->textBoxSeed->setEnabled(false);
 }
 
